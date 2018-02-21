@@ -182,7 +182,7 @@ class BreederMap:
         icon_path = ':/plugins/BreederMap/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Breeder Map'),
+            text=self.tr(u'Create Field Map'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
