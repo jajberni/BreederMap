@@ -27,6 +27,7 @@ from PyQt4.QtGui import QAction, QIcon
 import resources
 # Import the code for the dialog
 from breeder_map_dialog import BreederMapDialog
+from about_dialog import AboutDialog
 import os.path
 
 import math
@@ -70,6 +71,7 @@ class BreederMap:
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'BreederMap')
         self.toolbar.setObjectName(u'BreederMap')
+        self.dlgAbout = AboutDialog()
 
         # Plugin functionality
         self.canvas = self.iface.mapCanvas() #CHANGE
@@ -180,10 +182,22 @@ class BreederMap:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         icon_path = ':/plugins/BreederMap/icon.png'
+        about_icon_path = ':/plugins/BreederMap/icon-about.png'
         self.add_action(
             icon_path,
             text=self.tr(u'Create Field Map'),
             callback=self.run,
+            parent=self.iface.mainWindow())
+
+        self._actionAbout = QAction("Terms of Service / About", self.iface.mainWindow())
+        self._actionAbout.triggered.connect(self.dlgAbout.show)
+        #self.menu.addAction(self._actionAbout)
+        #self.dlgAbout.finished.connect(self._publicationInfoClosed)
+
+        self.add_action(
+            about_icon_path,
+            text=self.tr(u'About'),
+            callback=self.dlgAbout.show,
             parent=self.iface.mainWindow())
 
         # connect our select function to the canvasClicked signal
