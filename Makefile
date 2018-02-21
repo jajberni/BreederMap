@@ -38,15 +38,17 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	breeder_map.py breeder_map_dialog.py
+	breeder_map.py breeder_map_dialog.py \
+	about_dialog.py
 
 PLUGINNAME = BreederMap
 
 PY_FILES = \
 	__init__.py \
-	breeder_map.py breeder_map_dialog.py
+	breeder_map.py breeder_map_dialog.py \
+	about_dialog.py
 
-UI_FILES = breeder_map_dialog_base.ui
+UI_FILES = breeder_map_dialog_base.ui ui_about_dialog.ui
 
 EXTRAS = metadata.txt icon.png
 
