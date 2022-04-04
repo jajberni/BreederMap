@@ -103,6 +103,9 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.lbRows,
             self.btnHelp,
             self.btnAbout,
+            self.cbReverseColumns,
+            self.cbReverseRows,
+            self.cbIndividualNode
         ]:
             widget.setText(self.tr(widget.text()))
 
@@ -111,12 +114,15 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.columnCount,
             self.columnGap,
             self.rowGap,
+            self.cbReverseColumns,
+            self.cbReverseRows,
+            self.cbIndividualNode
         ]
 
         self.alert.setText("")
 
     def tr(self, message):
-        return QCoreApplication.translate("DemSlicer", message)
+        return QCoreApplication.translate("QPhenoGrid", message)
 
     def closeEvent(self, event):
         self.closingPlugin.emit()
@@ -164,34 +170,67 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def on_columnCount_valueChanged(self, v):
         self.mt.updateRubberGeom()
 
-    def on_cbReverseColumns_valueChanged(self, v):
+    def on_cbReverseColumns_toggled(self, v):
         self.mt.updateRubberGeom()
 
-    def on_cbReverseRows_valueChanged(self, v):
+    def on_cbReverseRows_toggled(self, v):
         self.mt.updateRubberGeom()
 
-    def clip_polygons(self, polygonsLayer, rowBuffer, columnBuffer):
+    def clip_polygons(self, polygonsLayer, rowBuffer, columnBuffer, iRowLayer, iColLayer):
         outgoingFeatureList = []
         finalFeatureList = []
         fields = polygonsLayer.fields()
         for f in polygonsLayer.getFeatures():
-            outgoingFeature = QgsFeature()
+
             localFeature = f.geometry()
             for compFeature in rowBuffer.asGeometryCollection():
                 if localFeature.intersects(compFeature):
                     localFeature = localFeature.difference(compFeature)
-            outgoingFeature.setFields(fields)
-            outgoingFeature.setGeometry(localFeature)
-            outgoingFeatureList.append(outgoingFeature)
+
+            if localFeature.isMultipart():
+                #self.info("Polys 1: {}".format(localFeature.asWkt()))
+                polys = localFeature.asGeometryCollection()
+                for part in polys:
+                    outgoingFeature = QgsFeature()
+                    outgoingFeature.setFields(fields)
+                    outgoingFeature.setGeometry(part)
+                    outgoingFeatureList.append(outgoingFeature)
+            else:
+                outgoingFeature = QgsFeature()
+                outgoingFeature.setFields(fields)
+                outgoingFeature.setGeometry(localFeature)
+                outgoingFeatureList.append(outgoingFeature)
         for f in outgoingFeatureList:
-            outgoingFeature = QgsFeature()
             localFeature = f.geometry()
+            for row_line in iRowLayer.getFeatures():
+                if localFeature.intersects(row_line.geometry()):
+                    row_number = row_line['row']
+                    break
             for compFeature in columnBuffer.asGeometryCollection():
                 if localFeature.intersects(compFeature):
                     localFeature = localFeature.difference(compFeature)
-            outgoingFeature.setFields(fields)
-            outgoingFeature.setGeometry(localFeature)
-            finalFeatureList.append(outgoingFeature)
+            if localFeature.isMultipart():
+                polys = localFeature.asGeometryCollection()
+                for part in polys:
+                    outgoingFeature = QgsFeature()
+                    outgoingFeature.setFields(fields)
+                    outgoingFeature['row'] = row_number
+                    outgoingFeature.setGeometry(part)
+                    finalFeatureList.append(outgoingFeature)
+            else:
+                outgoingFeature = QgsFeature()
+                outgoingFeature.setFields(fields)
+                outgoingFeature['row'] = row_number
+                outgoingFeature.setGeometry(localFeature)
+                finalFeatureList.append(outgoingFeature)
+        for f in finalFeatureList:
+            localFeature = f.geometry()
+            for col_line in iColLayer.getFeatures():
+                if localFeature.intersects(col_line.geometry()):
+                    col_number = col_line['column']
+                    f['column'] = col_number
+                    f['num'] = col_number*1000 + f['row']
+                    break
         return finalFeatureList
 
     def on_btnSave_released(self):
@@ -201,9 +240,11 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             "memory",
         )
 
-        QgsProject.instance().addMapLayer(layer)
+        #QgsProject.instance().addMapLayer(layer)
         layer.startEditing()
         layer.dataProvider().addAttributes([QgsField("num", QVariant.Int)])
+        layer.dataProvider().addAttributes([QgsField("row", QVariant.Int)])
+        layer.dataProvider().addAttributes([QgsField("column", QVariant.Int)])
         layer.updateFields()
         feats = []
 
@@ -230,70 +271,6 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         # layer.loadNamedStyle(self.plugin_dir + "/lines.qml")
         layer.commitChanges()
-
-        pLayer = QgsVectorLayer(
-            "Polygon?crs={}".format(QgsProject.instance().crs().authid()),
-            "Polygons",
-            "memory",
-        )
-        QgsProject.instance().addMapLayer(pLayer)
-        pLayer.dataProvider().addAttributes([QgsField("num", QVariant.Int)])
-        pLayer.startEditing()
-        pLayer.updateFields()
-        feats = []
-        feature = QgsFeature(0)
-        feature.setAttributes([str(fid)])
-
-        line_list = [f.geometry() for f in layer.getFeatures()]
-        lines = QgsGeometry.unaryUnion(line_list)
-        polygons = QgsGeometry.polygonize([lines])
-        fid = 0
-        for p in polygons.asGeometryCollection():
-            feature = QgsFeature(fid)
-            feature.setAttributes([str(fid)])
-            feature.setGeometry(p)
-            feats.append(feature)
-            fid += 1
-
-        pLayer.dataProvider().addFeatures(feats)
-        pLayer.commitChanges()
-
-        pcLayer = QgsVectorLayer(
-            "Polygon?crs={}".format(QgsProject.instance().crs().authid()),
-            "PolygonsClip",
-            "memory",
-        )
-        QgsProject.instance().addMapLayer(pcLayer)
-        pcLayer.dataProvider().addAttributes(pLayer.fields())
-        pcLayer.startEditing()
-        pcLayer.updateFields()
-        pcLayer.dataProvider().addFeatures(self.clip_polygons(pLayer, rowBuffer, columnBuffer))
-        pcLayer.commitChanges()
-
-        ptLayer = QgsVectorLayer(
-            "Point?crs={}".format(QgsProject.instance().crs().authid()),
-            "Points",
-            "memory"
-        )
-        QgsProject.instance().addMapLayer(ptLayer)
-        ptLayer.startEditing()
-        ptLayer.dataProvider().addAttributes([QgsField("num", QVariant.Int)])
-        ptLayer.updateFields()
-        feats = []
-        fid = 0
-        lin = QgsGeometry.fromMultiPolylineXY(self.mt.rowLines)
-
-        for line in lin.asGeometryCollection():
-            poly = line.densifyByCount(self.rowCount.value() * 2).asPolyline()
-            for part in poly:
-                feature = QgsFeature(fid)
-                feature.setAttributes([str(fid)])
-                feature.setGeometry(QgsPoint(part))
-                feats.append(feature)
-                fid += 1
-        # ptLayer.dataProvider().addFeatures(sorted(feats, key=lambda f: f['num']))
-        ptLayer.dataProvider().addFeatures(feats)
-        ptLayer.commitChanges()
 
         # Generate index lines
 
@@ -347,16 +324,16 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         polyline_columns = list(zip(backSide[1::2], frontSide[1::2]))
 
         # Generate Row lines
-        iLayer = QgsVectorLayer(
+        iRowLayer = QgsVectorLayer(
             "MultiLineString?crs={}".format(QgsProject.instance().crs().authid()),
             "Index Rows",
             "memory",
         )
 
-        QgsProject.instance().addMapLayer(iLayer)
-        iLayer.startEditing()
-        iLayer.dataProvider().addAttributes([QgsField("row", QVariant.Int)])
-        iLayer.updateFields()
+        #QgsProject.instance().addMapLayer(iRowLayer)
+        iRowLayer.startEditing()
+        iRowLayer.dataProvider().addAttributes([QgsField("row", QVariant.Int)])
+        iRowLayer.updateFields()
         feats = []
 
         row = 1
@@ -368,8 +345,8 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             feats.append(feature)
             row += 1
 
-        iLayer.dataProvider().addFeatures(feats)
-        iLayer.commitChanges()
+        iRowLayer.dataProvider().addFeatures(feats)
+        iRowLayer.commitChanges()
 
         # Generate Column lines
         iColLayer = QgsVectorLayer(
@@ -378,7 +355,7 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             "memory",
         )
 
-        QgsProject.instance().addMapLayer(iColLayer)
+        #QgsProject.instance().addMapLayer(iColLayer)
         iColLayer.startEditing()
         iColLayer.dataProvider().addAttributes([QgsField("column", QVariant.Int)])
         iColLayer.updateFields()
@@ -394,6 +371,75 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             column += 1
         iColLayer.dataProvider().addFeatures(feats)
         iColLayer.commitChanges()
+
+
+        pLayer = QgsVectorLayer(
+            "Polygon?crs={}".format(QgsProject.instance().crs().authid()),
+            "Polygons",
+            "memory",
+        )
+        #QgsProject.instance().addMapLayer(pLayer)
+        pLayer.dataProvider().addAttributes([QgsField("num", QVariant.Int)])
+        pLayer.dataProvider().addAttributes([QgsField("row", QVariant.Int)])
+        pLayer.dataProvider().addAttributes([QgsField("column", QVariant.Int)])
+        pLayer.startEditing()
+        pLayer.updateFields()
+        feats = []
+        feature = QgsFeature(0)
+        feature.setAttributes([str(fid), 0, 0])
+
+        line_list = [f.geometry() for f in layer.getFeatures()]
+        lines = QgsGeometry.unaryUnion(line_list)
+        polygons = QgsGeometry.polygonize([lines])
+        fid = 0
+        for p in polygons.asGeometryCollection():
+            feature = QgsFeature(fid)
+            feature.setAttributes([str(fid), 0, 0])
+            feature.setGeometry(p)
+            feats.append(feature)
+            fid += 1
+
+        pLayer.dataProvider().addFeatures(feats)
+        pLayer.commitChanges()
+
+        pcLayer = QgsVectorLayer(
+            "Polygon?crs={}".format(QgsProject.instance().crs().authid()),
+            "Plots",
+            "memory",
+        )
+        QgsProject.instance().addMapLayer(pcLayer)
+        pcLayer.dataProvider().addAttributes(pLayer.fields())
+        pcLayer.startEditing()
+        pcLayer.updateFields()
+        pcLayer.dataProvider().addFeatures(self.clip_polygons(pLayer, rowBuffer, columnBuffer, iRowLayer, iColLayer))
+        pcLayer.commitChanges()
+
+        ptLayer = QgsVectorLayer(
+            "Point?crs={}".format(QgsProject.instance().crs().authid()),
+            "Points",
+            "memory"
+        )
+        QgsProject.instance().addMapLayer(ptLayer)
+        ptLayer.startEditing()
+        ptLayer.dataProvider().addAttributes([QgsField("num", QVariant.Int)])
+        ptLayer.updateFields()
+        feats = []
+        fid = 0
+        lin = QgsGeometry.fromMultiPolylineXY(self.mt.rowLines)
+
+        for line in lin.asGeometryCollection():
+            poly = line.densifyByCount(self.rowCount.value() * 2).asPolyline()
+            for part in poly:
+                feature = QgsFeature(fid)
+                feature.setAttributes([str(fid)])
+                feature.setGeometry(QgsPoint(part))
+                feats.append(feature)
+                fid += 1
+        # ptLayer.dataProvider().addFeatures(sorted(feats, key=lambda f: f['num']))
+        ptLayer.dataProvider().addFeatures(feats)
+        ptLayer.commitChanges()
+
+
 
 
 class MapTool(QgsMapTool):
@@ -464,7 +510,7 @@ class MapTool(QgsMapTool):
 
         # final pan
         self.rbPan = QgsRubberBand(self.canvas, QgsWkbTypes.PointGeometry)
-        self.rbPan.setColor(QColor(200, 120, 50, 255))
+        self.rbPan.setColor(QColor(0, 200, 50, 255))
         self.rbPan.setWidth(8)
 
         # ROTATE node
@@ -574,13 +620,28 @@ class MapTool(QgsMapTool):
                 + polyline[:: max(1, 1 + int(len(polyline) / 50))][-50:]
             )
         )
-
-        if self.widget.cbReverseColumns.isChecked():
-            self.rbPD.setColor(Qt.red)
-            self.rbPC.setColor(QColor(255, 50, 150, 255))
+        if self.widget.cbReverseRows.isChecked():
+            if self.widget.cbReverseColumns.isChecked():
+                self.rbPC.setColor(Qt.red)
+                self.rbPD.setColor(Qt.red)
+                self.rbPA.setColor(Qt.red)
+                self.rbPB.setColor(QColor(0, 200, 150, 255))
+            else:
+                self.rbPC.setColor(Qt.red)
+                self.rbPD.setColor(Qt.red)
+                self.rbPB.setColor(Qt.red)
+                self.rbPA.setColor(QColor(0, 200, 150, 255))
         else:
-            self.rbPC.setColor(Qt.red)
-            self.rbPD.setColor(QColor(255, 50, 150, 255))
+            if self.widget.cbReverseColumns.isChecked():
+                self.rbPA.setColor(Qt.red)
+                self.rbPB.setColor(Qt.red)
+                self.rbPD.setColor(Qt.red)
+                self.rbPC.setColor(QColor(0, 200, 150, 255))
+            else:
+                self.rbPA.setColor(Qt.red)
+                self.rbPB.setColor(Qt.red)
+                self.rbPC.setColor(Qt.red)
+                self.rbPD.setColor(QColor(0, 200, 150, 255))
 
         self.widget.alert.setText("Total plots: {}".format(self.widget.columnCount.value()*self.widget.rowCount.value()))
 
