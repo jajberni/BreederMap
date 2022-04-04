@@ -1,7 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/BreederMap" >
+    <qresource prefix="/plugins/breeder_map" >
         <file>icon.png</file>
-        <file>qgiscloud.png</file>
-        <file>icon-about.png</file>
     </qresource>
 </RCC>
