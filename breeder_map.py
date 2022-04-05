@@ -76,7 +76,7 @@ def enable_remote_debugging():
             return
         ptvsd.enable_attach(address=("localhost", 5678))
         QgsMessageLog.logMessage(
-            "dem_slicer attached remote Debug for Visual Studio on port 5678",
+            "BreederMap attached remote Debug for Visual Studio on port 5678",
             MESSAGE_CATEGORY,
             Qgis.Info,
         )
@@ -133,9 +133,6 @@ class BreederMap:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Breeder Map')
-        # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'BreederMap')
-        self.toolbar.setObjectName(u'BreederMap')
 
         #print "** INITIALIZING BreederMap"
 
@@ -228,7 +225,8 @@ class BreederMap:
             action.setWhatsThis(whats_this)
 
         if add_to_toolbar:
-            self.toolbar.addAction(action)
+            # Adds plugin icon to Plugins toolbar
+            self.iface.addToolBarIcon(action)
 
         if add_to_menu:
             self.iface.addPluginToMenu(
@@ -279,10 +277,8 @@ class BreederMap:
                 self.tr(u'&Breeder Map'),
                 action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        del self.toolbar
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def run(self):
         """Run method that loads and starts the plugin"""

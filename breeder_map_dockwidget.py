@@ -180,7 +180,7 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         outgoingFeatureList = []
         finalFeatureList = []
         row_number = -1
-        
+
         fields = polygonsLayer.fields()
         for f in polygonsLayer.getFeatures():
 

@@ -1,2 +1,2 @@
-# BreederMap
-QGIS plug-in that creates a field layout for a typical row-column breeder's trial
+# Breeder Map
+Breeder Map is a QGIS plugin for assisting with the processing and extraction of field phenomics data.
