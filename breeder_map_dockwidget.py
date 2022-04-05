@@ -8,7 +8,7 @@
                              -------------------
         begin                : 2021-05-14
         git sha              : $Format:%H$
-        copyright            : (C) 2021 by Jose A. Jimenez-berni
+        copyright            : (C) 2021 by Jose A. _Jimenez-Berni
         email                : berni@ias.csic.es
  ***************************************************************************/
 
@@ -33,8 +33,9 @@ from qgis.PyQt.QtCore import (
     Qt,
     QVariant,
     QSettings,
+    QUrl
 )
-from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtGui import QColor, QDesktopServices
 from qgis._core import QgsLineString
 from qgis.core import (
     Qgis,
@@ -444,6 +445,12 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def on_btnAbout_released(self):
         from .about_dialog import AboutDialog
         AboutDialog(self.plugin.iface.mainWindow()).exec_()
+
+    def on_btnHelp_released(self):
+        """Display application help to the user."""
+        help_file = os.path.join(os.path.split(os.path.dirname(__file__))[0], 'help', 'index.html')
+        self.info("Show help: "+ help_file)
+        QDesktopServices.openUrl(QUrl.fromLocalFile(help_file))
 
 
 class MapTool(QgsMapTool):

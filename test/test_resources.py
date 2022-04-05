@@ -10,7 +10,7 @@
 
 __author__ = 'berni@ias.csic.es'
 __date__ = '2021-05-14'
-__copyright__ = 'Copyright 2021, Jose A. Jimenez-berni'
+__copyright__ = 'Copyright 2021, Jose A. _Jimenez-Berni'
 
 import unittest
 

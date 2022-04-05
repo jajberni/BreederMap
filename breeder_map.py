@@ -8,7 +8,7 @@
                               -------------------
         begin                : 2021-05-14
         git sha              : $Format:%H$
-        copyright            : (C) 2021 by Jose A. Jimenez-berni
+        copyright            : (C) 2021 by Jose A. _Jimenez-Berni
         email                : berni@ias.csic.es
  ***************************************************************************/
 
