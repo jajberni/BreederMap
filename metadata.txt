@@ -7,7 +7,7 @@ name=Breeder Map
 qgisMinimumVersion=3.0
 description=Creates a field layout for a typical row-column breeder's trial
 version=0.3
-author=Jose A. _Jimenez-Berni (IAS-CSIC)
+author=Jose A. Jimenez-Berni (IAS-CSIC)
 email=berni@ias.csic.es
 
 about=This plug-in allows to create a grid of polygons which define the plots in the breeding trial. These polygons will be labeled automatically with auto-increments for columns and rows. The user needs to define the number of columns (each tractor track) and rows (plots in the direction of the tractor when sowing), as well as the gaps between plot. The placement of the grid is interactive, and it is possible to edit the vertex independently for not regular shapes. It is also important to define the starting plot for correct automatic numbering.
