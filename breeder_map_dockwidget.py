@@ -620,8 +620,8 @@ class MapTool(QgsMapTool):
         self.rbLines.setToGeometry(
             QgsGeometry.fromMultiPolylineXY(
                 polylineX
-                + polyline[0:50]
-                + polyline[:: max(1, 1 + int(len(polyline) / 50))][-50:]
+                + polyline
+                + polyline[:: max(1, 1 + len(polyline))]
             )
         )
         if self.widget.cbReverseRows.isChecked():
