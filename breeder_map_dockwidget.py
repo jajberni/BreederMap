@@ -439,7 +439,9 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         ptLayer.dataProvider().addFeatures(feats)
         ptLayer.commitChanges()
 
-
+    def on_btnAbout_released(self):
+        from .about_dialog import AboutDialog
+        AboutDialog(self.plugin.iface.mainWindow()).exec_()
 
 
 class MapTool(QgsMapTool):

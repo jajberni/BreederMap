@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>232</width>
-    <height>316</height>
+    <width>267</width>
+    <height>334</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -178,6 +178,19 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>btnStart</tabstop>
+  <tabstop>rowCount</tabstop>
+  <tabstop>columnCount</tabstop>
+  <tabstop>rowGap</tabstop>
+  <tabstop>columnGap</tabstop>
+  <tabstop>cbReverseColumns</tabstop>
+  <tabstop>cbReverseRows</tabstop>
+  <tabstop>cbIndividualNode</tabstop>
+  <tabstop>btnSave</tabstop>
+  <tabstop>btnHelp</tabstop>
+  <tabstop>btnAbout</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
