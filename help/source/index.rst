@@ -80,6 +80,9 @@ to generate the temporary layers with the polygons and gap points.
 
 The individual plots and points can be edited in QGIS as usual.
 
+.. image:: _static/plot_edit.png
+   :align: center
+
 Please, remember to make the layers permanent otherwise, they will be
 lost when closing QGIS.
 
