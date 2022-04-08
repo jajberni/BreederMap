@@ -448,7 +448,7 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def on_btnHelp_released(self):
         """Display application help to the user."""
-        help_file = os.path.join(os.path.split(os.path.dirname(__file__))[0], 'help', 'index.html')
+        help_file ='file:///' + os.path.join(os.path.dirname(__file__), 'help', 'index.html')
         self.info("Show help: " + help_file)
         QDesktopServices.openUrl(QUrl.fromLocalFile(help_file))
 
