@@ -98,6 +98,7 @@ def enable_remote_debugging():
 
 # Import the code for the DockWidget
 from .breeder_map_dockwidget import BreederMapDockWidget
+from .breeder_map_about_dialog import AboutDialog
 import os.path
 
 
@@ -144,6 +145,8 @@ class BreederMap:
         ]
 
         self.started = False
+
+        self.about_action = None
 
 
 
@@ -303,5 +306,7 @@ class BreederMap:
             self.iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
 
+    def about(self):
+        AboutDialog(self.iface.mainWindow()).exec_()
 
 

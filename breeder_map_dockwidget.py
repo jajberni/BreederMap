@@ -443,7 +443,7 @@ class BreederMapDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         ptLayer.commitChanges()
 
     def on_btnAbout_released(self):
-        from .about_dialog import AboutDialog
+        from .breeder_map_about_dialog import AboutDialog
         AboutDialog(self.plugin.iface.mainWindow()).exec_()
 
     def on_btnHelp_released(self):

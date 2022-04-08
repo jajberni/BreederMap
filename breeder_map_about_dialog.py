@@ -6,7 +6,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'ui_about_dialog.ui'), resource_suffix='')
+    os.path.dirname(__file__), 'breeder_amp_about_dialog_base.ui'), resource_suffix='')
 
 
 class AboutDialog(QDialog, FORM_CLASS):
