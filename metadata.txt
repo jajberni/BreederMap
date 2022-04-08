@@ -6,7 +6,7 @@
 name=Breeder Map
 qgisMinimumVersion=3.0
 description=Creates a field layout for a typical row-column breeder's trial
-version=0.3
+version=0.3.1
 author=Jose A. Jimenez-Berni (IAS-CSIC)
 email=berni@ias.csic.es
 
