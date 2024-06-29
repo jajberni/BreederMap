@@ -533,12 +533,12 @@ class MapTool(QgsMapTool):
         # cutting lines
         self.rbLines = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
         self.rbLines.setColor(QColor(40, 180, 30, 255))
-        self.rbLines.setWidth(1.5)
+        self.rbLines.setWidth(2)
 
         # plots
         self.rbPlots = QgsRubberBand(self.canvas, QgsWkbTypes.PolygonGeometry)
         self.rbPlots.setStrokeColor(QColor(200, 120, 70, 150))
-        self.rbPlots.setWidth(0.8)
+        self.rbPlots.setWidth(1)
 
         self.rubbers = [
             self.rb,
