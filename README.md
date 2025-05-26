@@ -1,7 +1,24 @@
 # Breeder Map
-Breeder Map is a QGIS plugin for assisting with the processing and extracting field phenomics data.
 
-This plugin allows you to create a vector grid for extracting individual plot data in typical breeding trials organised in rows and columns. 
+This plugin allows the creation of a grid of polygons that define the
+plots in the breeding trial. These polygons will be labelled
+automatically with auto-increments for columns and rows. The user
+must specify the number of columns (each tractor track) and rows
+(plots in the tractor's direction when sowing) and the
+gaps between plots. The grid placement is interactive, and it is
+possible to edit the vertex independently for non-regular shapes. It
+is also essential to define the starting plot for correct automatic
+numbering.
+
+The plugin generates two temporary layers. One polygon layer and a
+point layer. The polygon layer contains the plot and has three
+attributes: column, row and num. The num attribute is a
+unique identifier calculated as “column” * 1000 + “row”. The point
+layer contains points extracted at the plot gaps that can be used to
+calculate the ground height when calculating plot height from a DEM.
+
+![image](help/source/_static/screenshot.png)
+
 
 ## Instalation
 
@@ -28,6 +45,7 @@ Define the number of Rows and Columns and gaps and click on "Start"
 In Breeder Map, Columns are each line in the direction of sowing, while Rows are each plot along the Columns. 
 
 This will show a grid on top of your map:
+
 ![image](https://github.com/user-attachments/assets/e10dfc9b-a507-4654-8b9e-ba1f51637e70)
 
 
@@ -37,9 +55,18 @@ There are two modes for adjusting the plots:
 
 Note that the green dot marks the 1-1 plot. You can adjust it by clicking on Reverse Rows or Reverse Columns. 
 
+![image](help/source/_static/field_layout.png)
+
 Once your layout is aligned with the plots, click Save and the plugin will create two new temporary layers.
 One layer contains the rectangles for each plot and the second layer are points created in the alleys for terrain extraction. 
 These points can be used to extract the bare ground height from a digital surface model, allowing the extraction of canopy height. 
+
+![image](help/source/_static/plot_edit.png)
+
+
+Remember to make the layers permanent; if not, they will be lost when closing QGIS.
+
+![image](help/source/_static/make_permanent.png)
 
 ## Funding and citation
 
